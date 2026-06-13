@@ -7,10 +7,9 @@
 
 ## Live URL
 
-_Deployed on Vercel — link to be added_
+**Frontend:** [https://ai-mini-crm.vercel.app](https://ai-mini-crm.vercel.app)
 
-CRM Backend API: `https://<ec2-public-ip>:4000`
-Channel Service: `https://<ec2-public-ip>:5000`
+**CRM Backend API:** `https://xeno-mini-crm-3ihr.onrender.com`
 
 ---
 
