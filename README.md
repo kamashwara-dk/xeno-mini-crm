@@ -28,57 +28,8 @@ This is **Paradigm C** — the marketer writes a brief; the AI owns the executio
 
 ## Architecture
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    Browser (React + Vite)                │
-│  HomePage → AudiencePreview → CampaignPage (live stats) │
-└──────────────────────┬──────────────────────────────────┘
-                       │ HTTP / Vite proxy
-                       ▼
-┌─────────────────────────────────────────────────────────┐
-│              CRM Backend  :4000  (Node + Express)        │
-│                                                         │
-│  POST /api/campaigns/brief                              │
-│    └─► Gemini API  ──► SQL WHERE clause                 │
-│    └─► Supabase RPC filter_customers                    │
-│    └─► Draft campaign in DB                             │
-│                                                         │
-│  POST /api/campaigns/:id/send                           │
-│    └─► Resolve full audience                            │
-│    └─► Insert communications (pending)                  │
-│    └─► Fire-and-forget → Channel Service               │
-│                                                         │
-│  POST /api/receipts/callback  (← Channel Service)       │
-│    └─► STATUS_RANK idempotency check                    │
-│    └─► Increment campaign stat via RPC                  │
-│    └─► Mark campaign completed when done               │
-│                                                         │
-│  GET  /api/campaigns/:id/stats  (← Frontend polls 3s)  │
-└──────────────────────┬──────────────────────────────────┘
-                       │                    ▲
-          POST /send   │                    │ webhook callbacks
-                       ▼                    │
-┌──────────────────────────────────────────┐│
-│     Channel Service  :5000  (stateless)  ││
-│                                          ││
-│  POST /send → enqueue(comms)             ││
-│    └─► outcomeEngine.resolve(channel)    ││
-│         weighted cascade per channel     ││
-│    └─► setTimeout per outcome event      ││
-│    └─► callbackSender (exp backoff)  ────┘│
-└──────────────────────────────────────────┘
-                       │
-                       ▼
-┌──────────────────────────────────────────┐
-│          Supabase  (PostgreSQL)           │
-│  customers · orders · campaigns          │
-│  communications · campaign_audience      │
-│  communication_status_history            │
-│  RPC: filter_customers                   │
-│  RPC: increment_campaign_stat            │
-│  RPC: wipe_all_data                      │
-└──────────────────────────────────────────┘
-```
+![Architecture Diagram](docs/architecture.png)
+
 
 ---
 
